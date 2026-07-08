@@ -3,10 +3,10 @@ import { create } from "zustand";
 import api from "../lib/api.ts";
 
 type UserStoreType = {
-  createNewUser: (clientId: string) => Promise<void>;
+  createUser: (clientId: string) => Promise<void>;
 };
 
-const useUserStore = create(() => ({
+const useUserStore = create<UserStoreType>(() => ({
   createUser: async (clientId: string) => {
     try {
       await api.post("/user/create-user", { clientId });
