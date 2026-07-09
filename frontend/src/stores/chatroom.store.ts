@@ -14,12 +14,15 @@ type RoomStoreType = {
   createChatroomLoading: boolean;
   createChatroomError: string | null;
   loadingLoadRooms: boolean;
+  joinRoomLoading: boolean;
+  joinRoomError: string | null;
   createRoom: (
     username: string,
     clientId: string,
     roomName: string,
   ) => Promise<Chatroom | null>;
   loadRooms: (clientId: string) => Promise<Chatroom[] | null>;
+  joinRoom: (joinCode: string, clientId: string) => Promise<Chatroom | null>;
 };
 
 const useChatroomStore = create<RoomStoreType>((set) => ({
@@ -27,6 +30,9 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
   createChatroomLoading: false,
   createChatroomError: null,
   loadingLoadRooms: false,
+
+  joinRoomLoading: false,
+  joinRoomError: null,
 
   createRoom: async (username: string, clientId: string, roomName: string) => {
     set({ createChatroomLoading: true, createChatroomError: null });
@@ -74,6 +80,35 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
     } catch (error) {
       console.log(error);
       set({ loadingLoadRooms: false });
+      return null;
+    }
+  },
+
+  joinRoom: async (joinCode: string, clientId: string) => {
+    set({ joinRoomLoading: true, joinRoomError: null });
+
+    try {
+      const response = await api.post("/chatroom/join-room", {
+        joinCode,
+        clientId,
+      });
+
+      const chatroom = response.data.chatroom as Chatroom;
+
+      set({ joinRoomLoading: false });
+
+      return chatroom;
+    } catch (error: any) {
+      console.log(error);
+      const message =
+        error?.response?.data?.message ?? "Something went wrong. Try again";
+
+      set({ joinRoomLoading: false, joinRoomError: message });
+
+      setTimeout(() => {
+        set({ joinRoomError: null });
+      }, 2000);
+
       return null;
     }
   },
