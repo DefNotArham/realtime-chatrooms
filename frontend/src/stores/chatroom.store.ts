@@ -10,9 +10,9 @@ type Chatroom = {
 };
 
 type RoomStoreType = {
-  chatroom: Chatroom | null;
   createChatroomLoading: boolean;
   createChatroomError: string | null;
+  loadingLoadRooms: boolean;
   createRoom: (
     username: string,
     clientId: string,
@@ -21,10 +21,10 @@ type RoomStoreType = {
 };
 
 const useChatroomStore = create<RoomStoreType>((set) => ({
-  chatroom: null,
-
   createChatroomLoading: false,
   createChatroomError: null,
+
+  loadingLoadRooms: false,
 
   createRoom: async (username: string, clientId: string, roomName: string) => {
     set({ createChatroomLoading: true, createChatroomError: null });
@@ -38,7 +38,7 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
 
       const chatroom = response.data.chatroom as Chatroom;
 
-      set({ chatroom, createChatroomLoading: false });
+      set({ createChatroomLoading: false });
 
       return chatroom;
     } catch (error: any) {
@@ -53,6 +53,22 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
       }, 2000);
 
       return null;
+    }
+  },
+
+  loadRooms: async (clientId: string) => {
+    set({ loadingLoadRooms: true });
+    try {
+      const response = await api.get("/chatroom/load-rooms", {
+        params: { clientId },
+      });
+
+      set({ loadingLoadRooms: false });
+
+      return response.data.rooms;
+    } catch (error) {
+      console.log(error);
+      set({ loadingLoadRooms: false });
     }
   },
 }));
