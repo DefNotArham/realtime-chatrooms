@@ -4,6 +4,6 @@ import createChatroomController from "../controllers/createChatroom.controller.j
 
 const router = express.Router();
 
-router.post("create-chatroom", createChatroomController);
+router.post("/create-chatroom", createChatroomController);
 
 export default router;

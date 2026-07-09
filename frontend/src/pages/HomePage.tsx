@@ -1,7 +1,32 @@
 import { useState } from "react";
 
+import useChatroomStore from "../stores/chatroom.store";
+
 const HomePage = () => {
   const [showCreate, setShowCreate] = useState(false);
+
+  const { createRoom } = useChatroomStore();
+
+  const [roomName, setRoomName] = useState("");
+  const [username, setUsername] = useState("");
+  const clientId = localStorage.getItem("clientId");
+
+  const handleCreateRoom = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!clientId) {
+      console.log("ClientId not found");
+      return;
+    }
+
+    const room = await createRoom(username, clientId, roomName);
+
+    if (room) {
+      setShowCreate(false);
+      setRoomName("");
+      setUsername("");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 px-5 py-12 sm:py-16">
@@ -68,28 +93,35 @@ const HomePage = () => {
           className="fixed inset-0 bg-black/70 flex items-center justify-center p-5 z-50"
           onClick={() => setShowCreate(false)}
         >
-          <div
+          <form
             onClick={(e) => e.stopPropagation()}
+            onSubmit={(e) => handleCreateRoom(e)}
             className="bg-neutral-900 border border-neutral-800 rounded-2xl p-7 w-full max-w-sm flex flex-col gap-4"
           >
             <h2 className="text-2xl font-bold">Create a new room</h2>
 
             <input
+              onChange={(e) => setRoomName(e.target.value)}
+              value={roomName}
               autoFocus
               placeholder="Room name"
               className="bg-neutral-800 border border-neutral-700 rounded-lg px-3.5 py-3 text-sm focus:outline-none focus:border-amber-400"
             />
 
             <input
-              autoFocus
+              onChange={(e) => setUsername(e.target.value)}
+              value={username}
               placeholder="Username"
               className="bg-neutral-800 border border-neutral-700 rounded-lg px-3.5 py-3 text-sm focus:outline-none focus:border-amber-400"
             />
 
-            <button className="px-5 py-2.5 rounded-lg bg-amber-400 text-neutral-950 text-sm font-semibold hover:bg-amber-300 transition cursor-pointer">
+            <button
+              type="submit"
+              className="px-5 py-2.5 rounded-lg bg-amber-400 text-neutral-950 text-sm font-semibold hover:bg-amber-300 transition cursor-pointer"
+            >
               Create
             </button>
-          </div>
+          </form>
         </div>
       )}
     </div>
