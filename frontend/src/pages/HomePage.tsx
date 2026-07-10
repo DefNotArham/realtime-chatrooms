@@ -184,8 +184,14 @@ const HomePage = () => {
               className="bg-neutral-800 border border-neutral-700 rounded-lg px-3.5 py-3 font-mono text-lg tracking-[0.2em] text-center uppercase focus:outline-none focus:border-teal-300"
             />
 
+            {joinRoomError && (
+              <p className="w-full text-sm text-red-400 -mt-2">
+                {joinRoomError}
+              </p>
+            )}
+
             <button className="px-5 py-2.5 rounded-lg bg-teal-400 text-neutral-950 text-sm font-semibold hover:bg-teal-300 transition cursor-pointer">
-              Join
+              {joinRoomLoading ? <SyncLoader size={7} /> : "Join"}
             </button>
           </form>
         </div>
