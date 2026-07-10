@@ -6,6 +6,7 @@ import useChatroomStore from "../stores/chatroom.store";
 
 const HomePage = () => {
   const [showCreate, setShowCreate] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
 
   const {
     createRoom,
@@ -18,6 +19,7 @@ const HomePage = () => {
 
   const [roomName, setRoomName] = useState("");
   const [username, setUsername] = useState("");
+  const [joinCode, setJoinCode] = useState("");
   const clientId = localStorage.getItem("clientId");
 
   const handleCreateRoom = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -70,7 +72,10 @@ const HomePage = () => {
           </div>
 
           <div className="flex gap-2">
-            <button className="px-5 py-2.5 rounded-lg border border-neutral-700 text-sm font-semibold hover:border-neutral-500 transition cursor-pointer">
+            <button
+              onClick={() => setShowJoin(true)}
+              className="px-5 py-2.5 rounded-lg border border-neutral-700 text-sm font-semibold hover:border-neutral-500 transition cursor-pointer"
+            >
               Join by code
             </button>
 
@@ -137,6 +142,33 @@ const HomePage = () => {
               {createChatroomLoading ? <SyncLoader size={7} /> : "Create"}
             </button>
           </form>
+        </div>
+      )}
+
+      {showJoin && (
+        <div
+          className="fixed inset-0 bg-black/70 flex items-center justify-center p-5 z-50"
+          onClick={() => setShowJoin(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-neutral-900 border border-neutral-800 rounded-2xl p-7 w-full max-w-sm flex flex-col gap-4"
+          >
+            <h2 className="text-2xl font-bold">Join a room</h2>
+
+            <input
+              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+              value={joinCode}
+              autoFocus
+              maxLength={6}
+              placeholder="Enter code"
+              className="bg-neutral-800 border border-neutral-700 rounded-lg px-3.5 py-3 font-mono text-lg tracking-[0.2em] text-center uppercase focus:outline-none focus:border-teal-300"
+            />
+
+            <button className="px-5 py-2.5 rounded-lg bg-teal-400 text-neutral-950 text-sm font-semibold hover:bg-teal-300 transition cursor-pointer">
+              Join
+            </button>
+          </div>
         </div>
       )}
     </div>
