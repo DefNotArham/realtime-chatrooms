@@ -26,6 +26,7 @@ const HomePage = () => {
     joinRoomError,
     enterRoom,
     enterRoomLoading,
+    enterRoomError,
   } = useChatroomStore();
 
   const [roomName, setRoomName] = useState("");
@@ -197,6 +198,7 @@ const HomePage = () => {
 
             <button
               type="submit"
+              disabled={createChatroomLoading}
               className="px-5 py-2.5 rounded-lg bg-amber-400 text-neutral-950 text-sm font-semibold hover:bg-amber-300 transition cursor-pointer"
             >
               {createChatroomLoading ? <SyncLoader size={7} /> : "Create"}
@@ -232,7 +234,10 @@ const HomePage = () => {
               </p>
             )}
 
-            <button className="px-5 py-2.5 rounded-lg bg-teal-400 text-neutral-950 text-sm font-semibold hover:bg-teal-300 transition cursor-pointer">
+            <button
+              disabled={joinRoomLoading}
+              className="px-5 py-2.5 rounded-lg bg-teal-400 text-neutral-950 text-sm font-semibold hover:bg-teal-300 transition cursor-pointer"
+            >
               {joinRoomLoading ? <SyncLoader size={7} /> : "Join"}
             </button>
           </form>
@@ -259,8 +264,17 @@ const HomePage = () => {
               className="bg-neutral-800 border border-neutral-700 rounded-lg px-3.5 py-3 text-sm focus:outline-none focus:border-amber-400"
             />
 
-            <button className="px-5 py-2.5 rounded-lg bg-amber-400 text-neutral-950 text-sm font-semibold hover:bg-amber-300 transition cursor-pointer">
-              Continue
+            {enterRoomError && (
+              <p className="w-full text-sm text-red-400 -mt-2">
+                {enterRoomError}
+              </p>
+            )}
+
+            <button
+              disabled={enterRoomLoading}
+              className="px-5 py-2.5 rounded-lg bg-amber-400 text-neutral-950 text-sm font-semibold hover:bg-amber-300 transition cursor-pointer"
+            >
+              {enterRoomLoading ? <SyncLoader size={7} /> : "Continue"}
             </button>
           </form>
         </div>
