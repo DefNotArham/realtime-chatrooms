@@ -85,8 +85,8 @@ SyncRoom
 ### Clone repository
 
 ```bash
-git clone https://github.com/yourusername/syncroom.git
-cd syncroom
+git clone https://github.com/DefNotArham/realtime-chatrooms/tree/main
+cd project-name
 ```
 
 ---
