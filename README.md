@@ -79,44 +79,6 @@ SyncRoom
 
 ---
 
-## 📡 API Routes
-
-### Chatrooms
-
-| Method | Endpoint             | Description          |
-| ------ | -------------------- | -------------------- |
-| POST   | `/create-chatroom`   | Create a new room    |
-| GET    | `/load-rooms`        | Load user's rooms    |
-| POST   | `/join-room`         | Join room using code |
-| POST   | `/enter-room`        | Enter chat room      |
-| POST   | `/load-current-room` | Get room information |
-
-### Messages
-
-| Method | Endpoint         | Description            |
-| ------ | ---------------- | ---------------------- |
-| POST   | `/send-message`  | Send a message         |
-| POST   | `/load-messages` | Load previous messages |
-
----
-
-## ⚡ Socket Events
-
-### Client → Server
-
-| Event        | Description            |
-| ------------ | ---------------------- |
-| `join-room`  | Join a Socket.IO room  |
-| `leave-room` | Leave a Socket.IO room |
-
-### Server → Client
-
-| Event                 | Description                    |
-| --------------------- | ------------------------------ |
-| `new-message`         | Receive new messages instantly |
-| `room-online-updated` | Updates active users           |
-
----
 
 ## 🚀 Running Locally
 
