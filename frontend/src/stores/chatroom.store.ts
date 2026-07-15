@@ -11,6 +11,13 @@ type Chatroom = {
   members: string[];
 };
 
+type Message = {
+  _id: string;
+  message: string;
+  username: string;
+  userId: string;
+};
+
 type RoomStoreType = {
   currentRoom: Chatroom | null;
   rooms: Chatroom[];
@@ -34,6 +41,12 @@ type RoomStoreType = {
     roomId: string,
     clientId: string,
   ) => Promise<Chatroom | null>;
+  sendMessage: (
+    roomId: string,
+    clientId: string,
+    message: string,
+  ) => Promise<boolean>;
+  loadMessages: (roomId: string) => Promise<Message[] | null>;
 };
 
 const useChatroomStore = create<RoomStoreType>((set) => ({
@@ -178,6 +191,34 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
         console.log(error.response?.data?.message);
       }
 
+      return null;
+    }
+  },
+
+  sendMessage: async (roomId: string, clientId: string, message: string) => {
+    try {
+      await api.post("/chatroom/send-message", {
+        roomId,
+        clientId,
+        message,
+      });
+
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  },
+
+  loadMessages: async (roomId) => {
+    try {
+      const response = await api.post("/chatroom/load-messages", {
+        roomId,
+      });
+
+      return response.data.messages;
+    } catch (error) {
+      console.log(error);
       return null;
     }
   },

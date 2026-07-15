@@ -14,7 +14,45 @@ const RoomPage = () => {
 
   const navigate = useNavigate();
 
-  const { loadCurrentRoom, currentRoom } = useChatroomStore();
+  const { loadCurrentRoom, currentRoom, sendMessage, loadMessages } =
+    useChatroomStore();
+
+  const [message, setMessage] = useState("");
+
+  type Message = {
+    _id: string;
+    message: string;
+    username: string;
+    userId: string;
+  };
+
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    socket.on("new-message", (data) => {
+      console.log("NEW MESSAGE:", data);
+
+      setMessages((prev) => [...prev, data]);
+    });
+
+    return () => {
+      socket.off("new-message");
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!roomId) return;
+
+      const oldMessages = await loadMessages(roomId);
+
+      if (oldMessages) {
+        setMessages(oldMessages);
+      }
+    };
+
+    fetchMessages();
+  }, [roomId]);
 
   // 1. Start listening first
   useEffect(() => {
@@ -96,29 +134,83 @@ const RoomPage = () => {
 
       {/* Messages */}
       <main className="flex-1 overflow-y-auto p-6">
-        <div className="max-w-4xl mx-auto flex flex-col gap-4">
-          <div className="self-start max-w-xs rounded-xl bg-neutral-900 border border-neutral-800 px-4 py-3">
-            <p className="text-xs text-amber-400 mb-1">Alice</p>
-            <p>Hello everyone 👋</p>
-          </div>
+        {messages.map((msg) => (
+          <div
+            key={msg._id}
+            className={`max-w-xs mt-2 rounded-xl px-4 py-3 ${
+              msg.userId === clientId
+                ? "self-end bg-teal-400 text-neutral-950"
+                : "self-start bg-neutral-900 border border-neutral-800"
+            }`}
+          >
+            <p
+              className={`text-xs mb-1 ${
+                msg.userId === clientId ? "text-neutral-800" : "text-amber-400"
+              }`}
+            >
+              {msg.username}
+            </p>
 
-          <div className="self-end max-w-xs rounded-xl bg-teal-400 text-neutral-950 px-4 py-3">
-            <p className="text-xs font-semibold mb-1">You</p>
-            <p>Hi!</p>
+            <p>{msg.message}</p>
           </div>
-        </div>
+        ))}
       </main>
 
       {/* Message Input */}
       <footer className="border-t border-neutral-800 p-5">
         <div className="max-w-4xl mx-auto flex gap-3">
           <input
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                sendMessage(roomId!, clientId!, message);
+                setMessage("");
+              }
+            }}
             type="text"
             placeholder="Type a message..."
-            className="flex-1 bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-teal-400"
+            className="
+        flex-1
+        bg-neutral-900
+        border
+        border-neutral-800
+        rounded-xl
+        px-5
+        py-3
+        text-neutral-100
+        placeholder:text-neutral-500
+        focus:outline-none
+        focus:border-teal-400
+        transition
+      "
           />
 
-          <button className="px-6 py-3 rounded-xl bg-teal-400 text-neutral-950 font-semibold hover:bg-teal-300 transition cursor-pointer">
+          <button
+            onClick={async () => {
+              if (!message.trim()) return;
+              if (!roomId || !clientId) return;
+
+              const sent = await sendMessage(roomId, clientId, message);
+
+              if (sent) {
+                setMessage("");
+              }
+            }}
+            className="
+        px-7
+        py-3
+        rounded-xl
+        bg-teal-400
+        text-neutral-950
+        font-semibold
+        hover:bg-teal-300
+        active:scale-95
+        transition
+        cursor-pointer
+      "
+          >
             Send
           </button>
         </div>

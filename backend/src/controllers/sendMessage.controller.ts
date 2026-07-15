@@ -41,24 +41,44 @@ const sendMessageController = async (
         .status(404)
         .json({ success: false, message: "User not found" });
 
+    if (!message.trim())
+      return res.status(400).json({
+        success: false,
+        message: "Message cannot be empty",
+      });
+
+    const cleanMessage = message.trim();
+
+    if (!cleanMessage)
+      return res.status(400).json({
+        success: false,
+        message: "Message cannot be empty",
+      });
+
+    if (!room.members.some((id) => id.equals(user._id))) {
+      return res.status(403).json({
+        success: false,
+        message: "User is not in this room",
+      });
+    }
+
     const newMessage = await Message.create({
       roomId,
       userId: user._id,
-      content: message,
+      content: cleanMessage,
     });
 
     const io = getIO();
 
     io.to(roomId).emit("new-message", {
-      _id: newMessage._id,
+      _id: newMessage._id.toString(),
       message: newMessage.content,
       username: user.username,
-      userId: user._id,
+      userId: user._id.toString(),
     });
 
-    res.status(200).json({
+    return res.status(201).json({
       success: true,
-      message: newMessage,
     });
   } catch (error) {
     console.log(error);
