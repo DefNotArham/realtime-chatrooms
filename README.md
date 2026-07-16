@@ -45,25 +45,6 @@ https://github.com/user-attachments/assets/09fe5060-6a02-4e99-ab44-f539f96e2163
 
 ---
 
-## 🏗️ Architecture
-
-```
-SyncRoom
-
-├── Client (React)
-│   ├── Room UI
-│   ├── Zustand State Management
-│   └── Socket.IO Client
-│
-└── Server (Express)
-    ├── REST API
-    ├── Socket.IO Server
-    ├── MongoDB Database
-    └── Message Persistence
-```
-
----
-
 ## 🔄 How It Works
 
 1. User receives a unique client ID stored locally.
