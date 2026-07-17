@@ -67,7 +67,7 @@ https://github.com/user-attachments/assets/09fe5060-6a02-4e99-ab44-f539f96e2163
 ### Clone repository
 
 ```bash
-git clone https://github.com/DefNotArham/realtime-chatrooms/tree/main
+git clone 
 cd project-name
 ```
 
@@ -76,7 +76,7 @@ cd project-name
 ## Backend Setup
 
 ```bash
-cd server
+cd backend
 npm install
 ```
 
@@ -99,7 +99,7 @@ npm run dev
 ## Frontend Setup
 
 ```bash
-cd client
+cd frontend
 npm install
 ```
 
