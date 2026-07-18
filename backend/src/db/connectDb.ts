@@ -6,7 +6,9 @@ dotenv.config();
 const connectDb = async () => {
   const MONGO_URI = process.env.MONGO_URI;
 
-  if (!MONGO_URI) return console.log(`Mongo URI not found`);
+  if (!MONGO_URI) {
+    throw new Error("MONGO_URI missing");
+  }
 
   try {
     await mongoose.connect(MONGO_URI);

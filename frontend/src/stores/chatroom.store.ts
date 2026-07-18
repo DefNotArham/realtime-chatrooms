@@ -2,7 +2,6 @@ import { create } from "zustand";
 import axios from "axios";
 
 import api from "../lib/api.ts";
-import socket from "../lib/socket.ts";
 
 type Chatroom = {
   _id: string;
@@ -105,6 +104,14 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
 
       return rooms;
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error?.response?.data?.message === "User not found") {
+          localStorage.removeItem("clientId");
+
+          window.location.reload();
+        }
+      }
+
       console.log(error);
       set({ loadingLoadRooms: false });
       return null;

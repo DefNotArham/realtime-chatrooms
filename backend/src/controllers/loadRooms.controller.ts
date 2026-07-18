@@ -20,10 +20,13 @@ const loadRoomsController = async (
 
     const user = await User.findOne({ clientId }).populate("rooms");
 
-    if (!user)
+    if (!user) {
+      // const newUser = await User.create({ clientId });
+
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
+    }
 
     return res.status(200).json({ success: true, rooms: user.rooms });
   } catch (error) {
