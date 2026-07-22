@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { SyncLoader } from "react-spinners";
@@ -51,7 +51,7 @@ const HomePage = () => {
     fetchRooms();
   }, []);
 
-  const handleCreateRoom = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateRoom = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!clientId) {
@@ -66,9 +66,9 @@ const HomePage = () => {
       setRoomName("");
       await loadRooms(clientId);
     }
-  };
+  }, [clientId, createRoom, roomName, loadRooms]);
 
-  const handleJoinCode = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleJoinCode = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!clientId) {
@@ -85,9 +85,9 @@ const HomePage = () => {
     }
 
     setJoinCode("");
-  };
+  }, [clientId, joinRoom, joinCode, loadRooms]);
 
-  const handleEnterRoom = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleEnterRoom = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!clientId) {
@@ -107,9 +107,9 @@ const HomePage = () => {
       setShowUsername(false);
       navigate(`/room/${result._id}`);
     }
-  };
+  }, [clientId, selectedRoomId, enterRoom, username, navigate]);
 
-  const handleEditUsername = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleEditUsername = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!clientId) {
@@ -123,7 +123,8 @@ const HomePage = () => {
       setShowEditUsername(false);
       navigate(`/`);
     }
-  };
+  }, [clientId, editUsername, navigate]);
+
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 px-5 py-12 sm:py-16">
       <div className="max-w-3xl mx-auto">
