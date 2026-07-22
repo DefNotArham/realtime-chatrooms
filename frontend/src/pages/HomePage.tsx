@@ -49,7 +49,7 @@ const HomePage = () => {
     };
 
     fetchRooms();
-  }, []);
+  }, [clientId, loadRooms]);
 
   const handleCreateRoom = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
