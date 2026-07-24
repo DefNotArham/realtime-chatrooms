@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import Chatroom from "../models/chatroom.model.js";
+import User from "../models/user.model.js";
 
 type EditVisibilityType = {
     clientId: string;
@@ -24,23 +25,29 @@ const editVisibilityController = async (
         .status(400)
         .json({ success: false, message: "Room Id not found" });
 
-    if (!isPublic)
+    if (typeof isPublic !== "boolean")
       return res
         .status(400)
         .json({ success: false, message: "IsPublic not found" });
 
-    const chatroom = await Chatroom.findOne({ roomId });
+    const chatroom = await Chatroom.findById(roomId);
 
     if (!chatroom)
       return res
         .status(404)
         .json({ success: false, message: "Room not found" });
 
-    const owner = chatroom.owner.toString();
-    if (owner !== clientId) {
+    const user = await User.findOne({ clientId });
+
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+
+    if (!chatroom.owner.equals(user._id)) {
       return res
         .status(403)
-        .json({ success: false, message: "You are not the owner of this room" });
+        .json({ success: false, code: "NOT_OWNER", message: "You are not the owner of this room" });
     }
 
     chatroom.isPublic = isPublic;

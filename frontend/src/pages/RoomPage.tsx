@@ -19,10 +19,12 @@ const RoomPage = () => {
 
   const navigate = useNavigate();
 
-  const { loadCurrentRoom, currentRoom, sendMessage, loadMessages } =
+  const { loadCurrentRoom, currentRoom, sendMessage, loadMessages, editVisibility } =
     useChatroomStore();
 
   const [message, setMessage] = useState("");
+
+  const [isPublicLoading, setIsPublicLoading] = useState(false);
 
   type Message = {
     _id: string;
@@ -126,6 +128,23 @@ const RoomPage = () => {
     }
   };
 
+  const handleToggleVisibility = async () => {
+    if (!roomId || !currentRoom || !clientId) return;
+
+    const newVisibility = !currentRoom.isPublic;
+    setIsPublicLoading(true);
+    const result = await editVisibility(roomId, clientId, newVisibility);
+    setIsPublicLoading(false);
+
+    if (result === "NOT_OWNER") {
+      alert("Only the room owner can change visibility");
+    } else if (result === null) {
+      alert("Failed to change visibility");
+    }
+  };
+
+  const isPublic = currentRoom?.isPublic ?? false;
+
   return (
     <div className="h-[100dvh] bg-neutral-950 text-neutral-100 flex flex-col relative py-3 lg:py-0">
       <header className="shrink-0 border-b border-neutral-800 px-6 py-4 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
@@ -140,6 +159,31 @@ const RoomPage = () => {
         </div>
 
         <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-neutral-400 cursor-pointer select-none">
+              <span className="text-xs uppercase tracking-wider">Public</span>
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={isPublic}
+                  onChange={handleToggleVisibility}
+                  disabled={isPublicLoading}
+                  className="sr-only"
+                />
+                <div
+                  className={`w-10 h-6 rounded-full transition-colors ${
+                    isPublic ? "bg-teal-400" : "bg-neutral-700"
+                  } ${isPublicLoading ? "opacity-50" : ""}`}
+                />
+                <div
+                  className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                    isPublic ? "translate-x-4" : ""
+                  }`}
+                />
+              </div>
+            </label>
+          </div>
+
           <div className="flex items-center gap-2 text-sm text-neutral-400">
             <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
             {onlineCount} Online

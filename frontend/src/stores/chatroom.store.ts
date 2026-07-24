@@ -8,6 +8,7 @@ type Chatroom = {
   name: string;
   joinCode: string;
   members: string[];
+  isPublic: boolean;
 };
 
 type Message = {
@@ -28,6 +29,7 @@ type RoomStoreType = {
   enterRoomLoading: boolean;
   joinRoomError: string | null;
   enterRoomError: string | null;
+  editVisibilityError: string | null;
 
   createRoom: (clientId: string, roomName: string) => Promise<Chatroom | null>;
   loadRooms: (clientId: string) => Promise<Chatroom[] | null>;
@@ -47,6 +49,7 @@ type RoomStoreType = {
     message: string,
   ) => Promise<boolean>;
   loadMessages: (roomId: string) => Promise<Message[] | null>;
+  editVisibility: (roomId: string, clientId: string, isPublic: boolean) => Promise<Chatroom | string | null>;
 };
 
 const useChatroomStore = create<RoomStoreType>((set) => ({
@@ -61,6 +64,8 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
 
   enterRoomLoading: false,
   enterRoomError: null,
+
+  editVisibilityError: null,
 
   createRoom: async (clientId: string, roomName: string) => {
     set({ createChatroomLoading: true, createChatroomError: null });
@@ -222,6 +227,33 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
       return null;
     }
   },
+
+  editVisibility: async (roomId: string, clientId: string, isPublic: boolean) => {
+    try {
+      const response = await api.post("/chatroom/edit-visibility", {
+        roomId,
+        clientId,
+        isPublic,
+      });
+
+      const room = response.data.chatroom as Chatroom;
+      set({ currentRoom: room });
+      return room;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data?.code === "NOT_OWNER") {
+          return "NOT_OWNER";
+        }
+
+        set({
+          editVisibilityError:
+            error.response?.data?.message ?? "Something went wrong",
+        });
+      }
+    }
+
+    return null;
+  }
 }));
 
 export default useChatroomStore;
