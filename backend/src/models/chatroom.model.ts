@@ -35,6 +35,7 @@ const chatroomSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    isPublic: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

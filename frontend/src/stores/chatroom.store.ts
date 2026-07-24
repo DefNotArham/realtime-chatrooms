@@ -9,6 +9,7 @@ type Chatroom = {
   description?: string;
   joinCode: string;
   members: string[];
+  isPublic: boolean;
 };
 
 type Message = {
@@ -22,13 +23,16 @@ type Message = {
 type RoomStoreType = {
   currentRoom: Chatroom | null;
   rooms: Chatroom[];
+  publicRooms: Chatroom[];
   createChatroomLoading: boolean;
   createChatroomError: string | null;
   loadingLoadRooms: boolean;
+  loadingPublicRooms: boolean;
   joinRoomLoading: boolean;
   enterRoomLoading: boolean;
   joinRoomError: string | null;
   enterRoomError: string | null;
+  editVisibilityError: string | null;
 
   createRoom: (
     clientId: string,
@@ -36,6 +40,7 @@ type RoomStoreType = {
     roomDescriptoin: string,
   ) => Promise<Chatroom | null>;
   loadRooms: (clientId: string) => Promise<Chatroom[] | null>;
+  loadPublicRooms: (clientId: string) => Promise<Chatroom[] | null>;
   joinRoom: (joinCode: string, clientId: string) => Promise<Chatroom | null>;
   enterRoom: (
     clientId: string,
@@ -52,20 +57,25 @@ type RoomStoreType = {
     message: string,
   ) => Promise<boolean>;
   loadMessages: (roomId: string) => Promise<Message[] | null>;
+  editVisibility: (roomId: string, clientId: string, isPublic: boolean) => Promise<Chatroom | string | null>;
 };
 
 const useChatroomStore = create<RoomStoreType>((set) => ({
   currentRoom: null,
   rooms: [],
+  publicRooms: [],
   createChatroomLoading: false,
   createChatroomError: null,
   loadingLoadRooms: false,
+  loadingPublicRooms: false,
 
   joinRoomLoading: false,
   joinRoomError: null,
 
   enterRoomLoading: false,
   enterRoomError: null,
+
+  editVisibilityError: null,
 
   createRoom: async (
     clientId: string,
@@ -117,6 +127,26 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
     } catch (error) {
       console.log(error);
       set({ loadingLoadRooms: false });
+      return null;
+    }
+  },
+
+  loadPublicRooms: async (clientId: string) => {
+    set({ loadingPublicRooms: true });
+
+    try {
+      const response = await api.get("/chatroom/load-public-room", {
+        params: { clientId },
+      });
+
+      const publicRooms = response.data.data as Chatroom[];
+
+      set({ publicRooms, loadingPublicRooms: false });
+
+      return publicRooms;
+    } catch (error) {
+      console.log("Error loading public rooms:", error);
+      set({ loadingPublicRooms: false });
       return null;
     }
   },
@@ -232,6 +262,33 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
       return null;
     }
   },
+
+  editVisibility: async (roomId: string, clientId: string, isPublic: boolean) => {
+    try {
+      const response = await api.post("/chatroom/edit-visibility", {
+        roomId,
+        clientId,
+        isPublic,
+      });
+
+      const room = response.data.chatroom as Chatroom;
+      set({ currentRoom: room });
+      return room;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data?.code === "NOT_OWNER") {
+          return "NOT_OWNER";
+        }
+
+        set({
+          editVisibilityError:
+            error.response?.data?.message ?? "Something went wrong",
+        });
+      }
+    }
+
+    return null;
+  }
 }));
 
 export default useChatroomStore;
