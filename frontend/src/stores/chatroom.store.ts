@@ -6,6 +6,7 @@ import api from "../lib/api.ts";
 type Chatroom = {
   _id: string;
   name: string;
+  description?: string;
   joinCode: string;
   members: string[];
   isPublic: boolean;
@@ -31,7 +32,11 @@ type RoomStoreType = {
   enterRoomError: string | null;
   editVisibilityError: string | null;
 
-  createRoom: (clientId: string, roomName: string) => Promise<Chatroom | null>;
+  createRoom: (
+    clientId: string,
+    roomName: string,
+    roomDescriptoin: string,
+  ) => Promise<Chatroom | null>;
   loadRooms: (clientId: string) => Promise<Chatroom[] | null>;
   joinRoom: (joinCode: string, clientId: string) => Promise<Chatroom | null>;
   enterRoom: (
@@ -67,13 +72,20 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
 
   editVisibilityError: null,
 
-  createRoom: async (clientId: string, roomName: string) => {
+  editVisibilityError: null,
+
+  createRoom: async (
+    clientId: string,
+    roomName: string,
+    roomDescription: string,
+  ) => {
     set({ createChatroomLoading: true, createChatroomError: null });
 
     try {
       const response = await api.post("/chatroom/create-chatroom", {
         clientId,
         roomName,
+        roomDescription,
       });
 
       const chatroom = response.data.chatroom as Chatroom;
