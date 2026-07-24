@@ -5,7 +5,7 @@ import { SyncLoader } from "react-spinners";
 
 import useChatroomStore from "../stores/chatroom.store";
 import useUserStore from "../stores/user.store";
-import { BiCopy } from "react-icons/bi";
+import { BiCheck, BiCopy } from "react-icons/bi";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -15,6 +15,7 @@ const HomePage = () => {
   const [showEditUsername, setShowEditUsername] = useState(false);
   const [showUsername, setShowUsername] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const {
     createRoom,
@@ -165,6 +166,17 @@ const HomePage = () => {
     }
   };
 
+  const handleCopy = (code: string) => {
+    if (!code) return;
+
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+
+    setTimeout(() => {
+      setCopiedCode(null);
+    }, 2000);
+  };
+
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 px-6 md:px-10 lg:px-5 py-12 sm:py-16">
       <div className="max-w-6xl mx-auto">
@@ -208,61 +220,69 @@ const HomePage = () => {
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-          {" "}
-          {rooms.map((r) => (
-            <div
-              key={r._id}
-              className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 hover:border-amber-400 hover:-translate-y-0.5 transition flex flex-col justify-between gap-3 sm:min-h-[220px]"
-            >
-              <div className="flex justify-between items-start gap-3">
-                <h2 className="text-lg font-bold ">{r?.name}</h2>
-              </div>
-
-              <p
-                className={`text-sm leading-relaxed line-clamp-3 ${
-                  r?.description
-                    ? "text-neutral-300"
-                    : "text-neutral-500 italic"
-                }`}
+          {rooms.map((r) => {
+            const isCopied = copiedCode === r?.joinCode;
+            return (
+              <div
+                key={r._id}
+                className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 hover:border-amber-400 hover:-translate-y-0.5 transition flex flex-col justify-between gap-3 sm:min-h-[220px]"
               >
-                {r?.description || "--No Description--"}
-              </p>
-
-              <div className="flex justify-between items-center mt-3">
-                <div
-                  onClick={() => {
-                    navigator.clipboard.writeText(r?.joinCode);
-                  }}
-                  title="Click to copy"
-                  className="flex items-center gap-1.5 font-mono text-xs font-semibold tracking-[0.12em] bg-neutral-800 border border-neutral-700 text-teal-300 px-2.5 py-1.5 rounded-md cursor-pointer hover:bg-neutral-700 transition"
-                >
-                  {r?.joinCode}
-                  <BiCopy size={13} className="text-teal-300" />
+                <div className="flex justify-between items-start gap-3">
+                  <h2 className="text-lg font-bold ">{r?.name}</h2>
                 </div>
 
-                <button
-                  onClick={async () => {
-                    if (!clientId) return;
-
-                    const result = await enterRoom(clientId, "", r._id);
-
-                    if (result === "USERNAME_REQUIRED") {
-                      setSelectedRoomId(r._id);
-                      setShowUsername(true);
-                      return;
-                    }
-
-                    if (result) {
-                      navigate(`/room/${result._id}`);
-                    }
-                  }}
-                  className="px-4 py-1.5 rounded-md bg-teal-400 text-neutral-950 text-sm font-semibold hover:bg-teal-300 transition cursor-pointer"
+                <p
+                  className={`text-sm leading-relaxed line-clamp-3 ${
+                    r?.description
+                      ? "text-neutral-300"
+                      : "text-neutral-500 italic"
+                  }`}
                 >
-                  Join
-                </button>
+                  {r?.description || "--No Description--"}
+                </p>
+
+                <div className="flex justify-between items-center mt-3">
+                  <div
+                    onClick={() => handleCopy(r?.joinCode)}
+                    title={isCopied ? "Copied!" : "Click to copy"}
+                    className={`flex items-center gap-1.5 font-mono text-xs font-semibold tracking-[0.12em] bg-neutral-800 border px-2.5 py-1.5 rounded-md cursor-pointer transition ${
+                      isCopied
+                        ? "border-teal-500/50 text-teal-400 bg-teal-950/20"
+                        : "border-neutral-700 text-teal-300 hover:bg-neutral-700"
+                    }`}
+                  >
+                    {isCopied ? "Copied!" : r?.joinCode}
+                    {isCopied ? (
+                      <BiCheck size={13} className="text-teal-400" />
+                    ) : (
+                      <BiCopy size={13} className="text-teal-300" />
+                    )}
+                  </div>
+
+                  <button
+                    onClick={async () => {
+                      if (!clientId) return;
+
+                      const result = await enterRoom(clientId, "", r._id);
+
+                      if (result === "USERNAME_REQUIRED") {
+                        setSelectedRoomId(r._id);
+                        setShowUsername(true);
+                        return;
+                      }
+
+                      if (result) {
+                        navigate(`/room/${result._id}`);
+                      }
+                    }}
+                    className="px-4 py-1.5 rounded-md bg-teal-400 text-neutral-950 text-sm font-semibold hover:bg-teal-300 transition cursor-pointer"
+                  >
+                    Join
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {publicRooms.length > 0 && (
