@@ -22,6 +22,14 @@ const EditUsernameController = async (
         .status(400)
         .json({ success: false, message: "Please enter your new username" });
       
+    // --- ĐOẠN CODE BẠN ĐÓNG GÓP THÊM VÀO ---
+    if (newUsername.length < 3 || newUsername.length > 20) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Username must be between 3 and 20 characters" });
+    }
+    // --------------------------------------
+
     const existingUser = await User.findOne({ clientId });
 
     if (!existingUser)
