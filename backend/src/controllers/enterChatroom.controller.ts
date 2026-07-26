@@ -15,9 +15,13 @@ const enterChatroomController = async (
   req: Request<{}, {}, EnterChatroomType>,
   res: Response,
 ) => {
-  const { clientId, username, roomId } = req.body;
+  const { clientId, roomId } = req.body;
+
+  let { username } = req.body;
 
   try {
+    username = username?.trim();
+
     if (!clientId)
       return res
         .status(404)
@@ -47,6 +51,13 @@ const enterChatroomController = async (
           success: false,
           code: "USERNAME_REQUIRED",
           message: "Please enter a username.",
+        });
+      }
+
+      if (username.length < 3 || username.length > 20) {
+        return res.status(400).json({
+          success: false,
+          message: "Username must be between 3 and 20 characters",
         });
       }
 

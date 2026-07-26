@@ -34,6 +34,8 @@ const HomePage = () => {
     enterRoomError,
   } = useChatroomStore();
 
+  const { editUsernameError } = useUserStore();
+
   const [roomName, setRoomName] = useState("");
   const [roomDescription, setRoomDescription] = useState("");
   const [joinCode, setJoinCode] = useState("");
@@ -449,6 +451,12 @@ const HomePage = () => {
               placeholder="Username"
               className="bg-neutral-800 border border-neutral-700 rounded-lg px-3.5 py-3 text-sm focus:outline-none focus:border-amber-400"
             />
+
+            {editUsernameError && (
+              <p className="w-full text-sm text-red-400 -mt-2">
+                {editUsernameError}
+              </p>
+            )}
 
             <button
               disabled={enterRoomLoading}

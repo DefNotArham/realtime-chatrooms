@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
-import { FaCrown } from 'react-icons/fa';
-
+import { FaCrown } from "react-icons/fa";
 
 import socket from "../lib/socket";
 
@@ -19,8 +18,13 @@ const RoomPage = () => {
 
   const navigate = useNavigate();
 
-  const { loadCurrentRoom, currentRoom, sendMessage, loadMessages, editVisibility } =
-    useChatroomStore();
+  const {
+    loadCurrentRoom,
+    currentRoom,
+    sendMessage,
+    loadMessages,
+    editVisibility,
+  } = useChatroomStore();
 
   const [message, setMessage] = useState("");
 
@@ -217,7 +221,9 @@ const RoomPage = () => {
                 msg.userId === clientId ? "text-neutral-800" : "text-amber-400"
               }`}
             >
-	      {msg.ownerId === msg.userId && <FaCrown className="w-4 h-4 mr-1 inline text-yellow-500" />}
+              {msg.ownerId === msg.userId && (
+                <FaCrown className="w-4 h-4 mr-1 inline text-yellow-500" />
+              )}
               {msg.username}
             </p>
 

@@ -57,7 +57,11 @@ type RoomStoreType = {
     message: string,
   ) => Promise<boolean>;
   loadMessages: (roomId: string) => Promise<Message[] | null>;
-  editVisibility: (roomId: string, clientId: string, isPublic: boolean) => Promise<Chatroom | string | null>;
+  editVisibility: (
+    roomId: string,
+    clientId: string,
+    isPublic: boolean,
+  ) => Promise<Chatroom | string | null>;
 };
 
 const useChatroomStore = create<RoomStoreType>((set) => ({
@@ -181,7 +185,7 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
   },
 
   enterRoom: async (clientId: string, username: string, roomId: string) => {
-    set({ enterRoomLoading: true });
+    set({ enterRoomLoading: true, enterRoomError: null });
 
     try {
       const response = await api.post("/chatroom/enter-room", {
@@ -197,10 +201,6 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
       set({ enterRoomLoading: false });
 
       if (axios.isAxiosError(error)) {
-        if (error.response?.data?.code === "USERNAME_REQUIRED") {
-          return "USERNAME_REQUIRED";
-        }
-
         set({
           enterRoomError:
             error.response?.data?.message ?? "Something went wrong",
@@ -263,7 +263,11 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
     }
   },
 
-  editVisibility: async (roomId: string, clientId: string, isPublic: boolean) => {
+  editVisibility: async (
+    roomId: string,
+    clientId: string,
+    isPublic: boolean,
+  ) => {
     try {
       const response = await api.post("/chatroom/edit-visibility", {
         roomId,
@@ -288,7 +292,7 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
     }
 
     return null;
-  }
+  },
 }));
 
 export default useChatroomStore;
