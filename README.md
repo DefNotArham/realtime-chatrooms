@@ -4,15 +4,15 @@ A real-time chat room platform built with **React, Node.js, Express, Socket.IO, 
 
 ## ✨ Features
 
-* 🔐 Unique client-based user system
-* 🏠 Create and manage chat rooms
-* 🔑 Join rooms using generated room codes
-* 💬 Real-time messaging with Socket.IO
-* 👥 Live online user count
-* 💾 Persistent message storage with MongoDB
-* 🔄 Message history loading after refresh
-* ⚡ Instant updates without page refresh
-* 🎨 Modern responsive UI
+- 🔐 Unique client-based user system
+- 🏠 Create and manage chat rooms
+- 🔑 Join rooms using generated room codes
+- 💬 Real-time messaging with Socket.IO
+- 👥 Live online user count
+- 💾 Persistent message storage with MongoDB
+- 🔄 Message history loading after refresh
+- ⚡ Instant updates without page refresh
+- 🎨 Modern responsive UI
 
 ---
 
@@ -20,28 +20,27 @@ A real-time chat room platform built with **React, Node.js, Express, Socket.IO, 
 
 ### Frontend
 
-* React
-* TypeScript
-* Tailwind CSS
-* Zustand
-* Socket.IO Client
-* Vite
+- React
+- TypeScript
+- Tailwind CSS
+- Zustand
+- Socket.IO Client
+- Vite
 
 ### Backend
 
-* Node.js
-* Express.js
-* TypeScript
-* Socket.IO
-* MongoDB
-* Mongoose
+- Node.js
+- Express.js
+- TypeScript
+- Socket.IO
+- MongoDB
+- Mongoose
 
 ---
 
 ## 📸 Preview
 
-https://github.com/user-attachments/assets/09fe5060-6a02-4e99-ab44-f539f96e2163 
-
+https://github.com/user-attachments/assets/09fe5060-6a02-4e99-ab44-f539f96e2163
 
 ---
 
@@ -50,24 +49,22 @@ https://github.com/user-attachments/assets/09fe5060-6a02-4e99-ab44-f539f96e2163
 1. User receives a unique client ID stored locally.
 2. Users can create a room or join an existing room using a code.
 3. When entering a room:
+   - Username is created if needed.
+   - User joins the Socket.IO room.
+   - Previous messages are loaded from MongoDB.
 
-   * Username is created if needed.
-   * User joins the Socket.IO room.
-   * Previous messages are loaded from MongoDB.
 4. New messages are:
-
-   * Saved in MongoDB.
-   * Broadcast instantly to everyone in the room.
+   - Saved in MongoDB.
+   - Broadcast instantly to everyone in the room.
 
 ---
-
 
 ## 🚀 Running Locally
 
 ### Clone repository
 
 ```bash
-git clone 
+git clone
 cd project-name
 ```
 
@@ -86,6 +83,7 @@ Create a `.env` file:
 PORT=8000
 MONGO_URI=your_mongodb_connection_string
 FRONTEND=http://localhost:5173
+GEMINI_API_KEY=<paste your gemini api key for message moderation>
 ```
 
 Start server:
@@ -119,13 +117,13 @@ npm run dev
 
 ## 🧪 Future Improvements
 
-* 🔒 User authentication
-* 📎 File sharing
-* 😀 Emoji reactions
-* 🔔 Notifications
-* 🟢 Typing indicators
-* 🛡️ Message moderation
-* 📱 Mobile app version
+- 🔒 User authentication
+- 📎 File sharing
+- 😀 Emoji reactions
+- 🔔 Notifications
+- 🟢 Typing indicators
+- 🛡️ Message moderation
+- 📱 Mobile app version
 
 ---
 

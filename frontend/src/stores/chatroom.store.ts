@@ -18,12 +18,14 @@ type Message = {
   username: string;
   userId: string;
   ownerId: string;
+  status: "pending" | "approved" | "flagged";
 };
 
 type RoomStoreType = {
   currentRoom: Chatroom | null;
   rooms: Chatroom[];
   publicRooms: Chatroom[];
+  messages: Message[];
   createChatroomLoading: boolean;
   createChatroomError: string | null;
   loadingLoadRooms: boolean;
@@ -62,12 +64,19 @@ type RoomStoreType = {
     clientId: string,
     isPublic: boolean,
   ) => Promise<Chatroom | string | null>;
+
+  setMessages: (
+    messagesOrFn: Message[] | ((prev: Message[]) => Message[]),
+  ) => void;
+  handleMessageFlagged: (data: { messageId: string; roomId: string }) => void;
+  handleMessageApproved: (data: { messageId: string; roomId: string }) => void;
 };
 
 const useChatroomStore = create<RoomStoreType>((set) => ({
   currentRoom: null,
   rooms: [],
   publicRooms: [],
+  messages: [],
   createChatroomLoading: false,
   createChatroomError: null,
   loadingLoadRooms: false,
@@ -256,7 +265,9 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
         roomId,
       });
 
-      return response.data.messages;
+      const messages = response.data.messages;
+      set({ messages });
+      return messages;
     } catch (error) {
       console.log(error);
       return null;
@@ -292,6 +303,30 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
     }
 
     return null;
+  },
+
+  setMessages: (messagesOrFn) =>
+    set((state) => ({
+      messages:
+        typeof messagesOrFn === "function"
+          ? messagesOrFn(state.messages)
+          : messagesOrFn,
+    })),
+
+  handleMessageFlagged: ({ messageId }) => {
+    set((state) => ({
+      messages: state.messages.map((msg) =>
+        msg._id === messageId ? { ...msg, status: "flagged" } : msg,
+      ),
+    }));
+  },
+
+  handleMessageApproved: ({ messageId }) => {
+    set((state) => ({
+      messages: state.messages.map((msg) =>
+        msg._id === messageId ? { ...msg, status: "approved" } : msg,
+      ),
+    }));
   },
 }));
 

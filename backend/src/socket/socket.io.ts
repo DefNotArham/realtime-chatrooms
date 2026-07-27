@@ -3,7 +3,31 @@ import type { Server as HttpServer } from "http";
 import Chatroom from "../models/chatroom.model.js";
 import User from "../models/user.model.js";
 
-let io: Server;
+// Server-to-Client payload types
+export interface ServerToClientEvents {
+  "new-message": (data: {
+    _id: string;
+    message: string;
+    username: string | null | undefined;
+    userId: string;
+    ownerId: string;
+    status: "pending" | "approved" | "flagged";
+  }) => void;
+  "message-flagged": (data: { messageId: string; roomId: string }) => void;
+  "message-approved": (data: { messageId: string; roomId: string }) => void;
+  "room-online-updated": (data: {
+    roomId: string;
+    onlineCount: number;
+  }) => void;
+}
+
+// Client-to-Server payload types
+export interface ClientToServerEvents {
+  "join-room": (data: { roomId: string; clientId: string }) => void;
+  "leave-room": (data: { roomId: string; clientId: string }) => void;
+}
+
+let io: Server<ClientToServerEvents, ServerToClientEvents>;
 
 export const initSocket = (httpServer: HttpServer, corsOrigin: string) => {
   io = new Server(httpServer, {

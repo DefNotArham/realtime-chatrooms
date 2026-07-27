@@ -15,16 +15,25 @@ const loadMessagesController = async (
       });
     }
 
+    // 1. Fetch ALL messages for the room (including flagged)
     const messages = await Message.find({ roomId })
       .populate("userId", "username")
       .sort({ createdAt: 1 });
 
-    const formattedMessages = messages.map((msg) => ({
-      _id: msg._id.toString(),
-      message: msg.content,
-      username: (msg.userId as any).username,
-      userId: (msg.userId as any)._id.toString(),
-    }));
+    // 2. Sanitize content if flagged
+    const formattedMessages = messages.map((msg) => {
+      const isFlagged = msg.status === "flagged";
+
+      return {
+        _id: msg._id.toString(),
+        message: isFlagged
+          ? "[This message was removed by automated moderation]"
+          : msg.content,
+        username: (msg.userId as any).username,
+        userId: (msg.userId as any)._id.toString(),
+        status: msg.status, // Pass status along so frontend knows if it's flagged
+      };
+    });
 
     return res.status(200).json({
       success: true,

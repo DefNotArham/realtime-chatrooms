@@ -4,6 +4,7 @@ import User from "../models/user.model.js";
 import Message from "../models/messsage.model.js";
 
 import { getIO } from "../socket/socket.io.js";
+import { moderateMessageAsync } from "../services/moderation.service.js";
 
 type MessageType = {
   roomId: string;
@@ -66,6 +67,7 @@ const sendMessageController = async (
       roomId,
       userId: user._id,
       content: cleanMessage,
+      status: "pending",
     });
 
     const io = getIO();
@@ -76,7 +78,10 @@ const sendMessageController = async (
       username: user.username,
       userId: user._id.toString(),
       ownerId: room.owner.toString(),
+      status: "pending",
     });
+
+    moderateMessageAsync(newMessage._id.toString(), cleanMessage, roomId);
 
     return res.status(201).json({
       success: true,
