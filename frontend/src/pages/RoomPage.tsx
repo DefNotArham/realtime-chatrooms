@@ -228,16 +228,29 @@ const RoomPage = () => {
           const isOwner = msg.ownerId === msg.userId;
           const isSelf = msg.userId === clientId;
 
-          // IF FLAGGED: Show warning text block
+          // FLAGGED MESSAGE
           if (msg.status === "flagged") {
             return (
               <div
                 key={msg._id}
-                className={`w-full max-w-sm mt-2 rounded-xl px-4 py-3 bg-red-950/40 border border-red-500/30 text-red-400 italic text-xs ${
+                className={`w-full max-w-sm mt-2 rounded-xl px-4 py-3 bg-red-950/40 border border-red-500/30 ${
                   isSelf ? "self-end" : "self-start"
                 }`}
               >
-                [This message was removed by automated moderation]
+                <p
+                  className={`text-xs mb-1 ${
+                    isSelf ? "text-red-300" : "text-amber-600"
+                  }`}
+                >
+                  {isOwner && (
+                    <FaCrown className="w-4 h-4 mr-1 inline text-amber-500" />
+                  )}
+                  {msg.username}
+                </p>
+
+                <p className="text-red-400 italic text-xs">
+                  [This message was removed by automated moderation]
+                </p>
               </div>
             );
           }
