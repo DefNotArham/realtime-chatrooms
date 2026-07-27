@@ -14,6 +14,19 @@ const messageSchema = new mongoose.Schema(
       required: true,
     },
     content: { type: String, required: true },
+
+    // -- Moderation Additions --
+    status: {
+      type: String,
+      enum: ["approved", "pending", "flagged"],
+      default: "pending",
+      index: true,
+    },
+    moderationDetails: {
+      flaggedCategories: [{ type: String }],
+      score: { type: Number },
+      reviewedAt: { type: Date },
+    },
   },
   { timestamps: true },
 );

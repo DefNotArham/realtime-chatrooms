@@ -15,7 +15,7 @@ const loadMessagesController = async (
       });
     }
 
-    const messages = await Message.find({ roomId })
+    const messages = await Message.find({ roomId, status: { $ne: "flagged" } })
       .populate("userId", "username")
       .sort({ createdAt: 1 });
 

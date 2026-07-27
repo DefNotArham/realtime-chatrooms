@@ -6,6 +6,15 @@ import socket from "../lib/socket";
 
 import useChatroomStore from "../stores/chatroom.store";
 
+type Message = {
+  _id: string;
+  message: string;
+  username: string;
+  userId: string;
+  ownerId: string;
+  status: "pending" | "approved" | "flagged";
+};
+
 const RoomPage = () => {
   console.log("ROOM PAGE RENDERED");
   const { roomId } = useParams();
@@ -24,33 +33,30 @@ const RoomPage = () => {
     sendMessage,
     loadMessages,
     editVisibility,
+    messages,
+    setMessages,
+    handleMessageApproved,
+    handleMessageFlagged,
   } = useChatroomStore();
 
   const [message, setMessage] = useState("");
 
   const [isPublicLoading, setIsPublicLoading] = useState(false);
 
-  type Message = {
-    _id: string;
-    message: string;
-    username: string;
-    userId: string;
-    ownerId?: string;
-  };
-
-  const [messages, setMessages] = useState<Message[]>([]);
-
+  // new message
   useEffect(() => {
-    socket.on("new-message", (data) => {
-      console.log("NEW MESSAGE:", data);
+    const handleNewMessage = (newMessage: Message) => {
+      console.log("NEW MESSAGE:", newMessage);
 
-      setMessages((prev) => [...prev, data]);
-    });
+      setMessages((prevMessages: Message[]) => [...prevMessages, newMessage]);
+    };
+
+    socket.on("new-message", handleNewMessage);
 
     return () => {
-      socket.off("new-message");
+      socket.off("new-message", handleNewMessage);
     };
-  }, []);
+  }, [setMessages]);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -114,6 +120,17 @@ const RoomPage = () => {
 
     fetchRoomData();
   }, []);
+
+  // Listen for moderation updates from backend
+  useEffect(() => {
+    socket.on("message-flagged", handleMessageFlagged);
+    socket.on("message-approved", handleMessageApproved);
+
+    return () => {
+      socket.off("message-flagged", handleMessageFlagged);
+      socket.off("message-approved", handleMessageApproved);
+    };
+  }, [roomId, handleMessageFlagged, handleMessageApproved]);
 
   const handleScroll = () => {
     if (!mainRef.current) return;
@@ -207,29 +224,49 @@ const RoomPage = () => {
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto p-6 flex flex-col"
       >
-        {messages.map((msg) => (
-          <div
-            key={msg._id}
-            className={`w-full max-w-sm mt-2 rounded-xl px-4 py-3 ${
-              msg.userId === clientId
-                ? "self-end bg-teal-400 text-neutral-950"
-                : "self-start bg-neutral-900 border border-neutral-800"
-            }`}
-          >
-            <p
-              className={`text-xs mb-1 ${
-                msg.userId === clientId ? "text-neutral-800" : "text-amber-400"
+        {messages.map((msg) => {
+          const isOwner = msg.ownerId === msg.userId;
+          const isSelf = msg.userId === clientId;
+
+          // IF FLAGGED: Show warning text block
+          if (msg.status === "flagged") {
+            return (
+              <div
+                key={msg._id}
+                className={`w-full max-w-sm mt-2 rounded-xl px-4 py-3 bg-red-950/40 border border-red-500/30 text-red-400 italic text-xs ${
+                  isSelf ? "self-end" : "self-start"
+                }`}
+              >
+                [This message was removed by automated moderation]
+              </div>
+            );
+          }
+
+          // REGULAR MESSAGE
+          return (
+            <div
+              key={msg._id}
+              className={`w-full max-w-sm mt-2 rounded-xl px-4 py-3 ${
+                isSelf
+                  ? "self-end bg-teal-400 text-neutral-950"
+                  : "self-start bg-neutral-900 border border-neutral-800"
               }`}
             >
-              {msg.ownerId === msg.userId && (
-                <FaCrown className="w-4 h-4 mr-1 inline text-yellow-500" />
-              )}
-              {msg.username}
-            </p>
+              <p
+                className={`text-xs mb-1 ${
+                  isSelf ? "text-neutral-800" : "text-amber-400"
+                }`}
+              >
+                {isOwner && (
+                  <FaCrown className="w-4 h-4 mr-1 inline text-yellow-500" />
+                )}
+                {msg.username}
+              </p>
 
-            <p>{msg.message}</p>
-          </div>
-        ))}
+              <p>{msg.message}</p>
+            </div>
+          );
+        })}
       </main>
 
       {showScrollBottom && (
