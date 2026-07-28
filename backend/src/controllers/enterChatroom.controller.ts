@@ -46,22 +46,7 @@ const enterChatroomController = async (
         .json({ success: false, message: "User not found" });
 
     if (!user.username) {
-      if (!username) {
-        return res.status(400).json({
-          success: false,
-          code: "USERNAME_REQUIRED",
-          message: "Please enter a username.",
-        });
-      }
-
-      if (username.length < 3 || username.length > 20) {
-        return res.status(400).json({
-          success: false,
-          message: "Username must be between 3 and 20 characters",
-        });
-      }
-
-      user.username = username;
+      user.username = username || `User-${clientId.slice(0, 4)}`;
       await user.save();
     }
 
