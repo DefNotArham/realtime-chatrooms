@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "./Header";
 import RoomsList from "./RoomsList";
 import PublicRoomsList from "./PublicRoomsList";
@@ -6,6 +6,7 @@ import CreateRoomModal from "./modals/CreateRoomModal";
 import JoinRoomModal from "./modals/JoinRoomModal";
 import EditUsernameModal from "./modals/EditUsernameModal";
 import UsernameModal from "./modals/UsernameModal";
+import useChatroomStore from "../../stores/chatroom.store";
 
 const HomePage = () => {
   const [showCreate, setShowCreate] = useState(false);
@@ -13,6 +14,23 @@ const HomePage = () => {
   const [showJoin, setShowJoin] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState("");
   const [showUsername, setShowUsername] = useState(false);
+
+  const clientId = localStorage.getItem("clientId");
+  const { loadRooms, loadPublicRooms } = useChatroomStore();
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      if (!clientId) {
+        console.log("ClientId not found");
+        return;
+      }
+
+      await loadRooms(clientId);
+      await loadPublicRooms(clientId);
+    };
+
+    fetchRooms();
+  }, [clientId, loadPublicRooms, loadRooms]);
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 px-6 md:px-10 lg:px-5 py-12 sm:py-16">
