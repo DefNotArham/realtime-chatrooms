@@ -3,6 +3,7 @@ import User from "../models/user.model.js";
 import Message from "../models/messsage.model.js";
 
 import type { Request, Response } from "express";
+import { checkInappropriateText } from "../services/moderation.service.js";
 
 type RoomType = {
   username: string;
@@ -34,6 +35,29 @@ const createChatroomController = async (
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
+
+    const isNameFlagged = await checkInappropriateText(roomName, "room name");
+    if (isNameFlagged) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Room name contains inappropriate language. Please choose another name.",
+      });
+    }
+
+    if (roomDescription) {
+      const isDescFlagged = await checkInappropriateText(
+        roomDescription,
+        "room description",
+      );
+      if (isDescFlagged) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Room description contains inappropriate language. Please modify it.",
+        });
+      }
+    }
 
     const chatroom = await Chatroom.create({
       name: roomName,

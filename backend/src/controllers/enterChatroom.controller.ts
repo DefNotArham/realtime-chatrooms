@@ -4,6 +4,7 @@ import User from "../models/user.model.js";
 import Chatroom from "../models/chatroom.model.js";
 
 import { getIO } from "../socket/socket.io.js";
+import { checkInappropriateText } from "../services/moderation.service.js";
 
 type EnterChatroomType = {
   clientId: string;
@@ -46,7 +47,25 @@ const enterChatroomController = async (
         .json({ success: false, message: "User not found" });
 
     if (!user.username) {
-      user.username = username || `User-${clientId.slice(0, 4)}`;
+      if (username && username.trim()) {
+        const isNameFlagged = await checkInappropriateText(
+          username,
+          "username",
+        );
+
+        if (isNameFlagged) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "Username contains inappropriate language. Please choose another username.",
+          });
+        }
+
+        user.username = username;
+      } else {
+        user.username = `User-${clientId.slice(0, 4)}`;
+      }
+
       await user.save();
     }
 
