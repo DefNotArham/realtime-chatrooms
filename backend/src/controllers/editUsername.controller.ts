@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import User from "../models/user.model.js";
+import { checkInappropriateText } from "../services/moderation.service.js";
 
 type EditUsernameType = {
   clientId: string;
@@ -41,6 +42,15 @@ const EditUsernameController = async (
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
+
+    const isNameFlagged = await checkInappropriateText(newUsername, "username");
+    if (isNameFlagged) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Username contains inappropriate language. Please choose another username.",
+      });
+    }
 
     existingUser.username = newUsername;
     await existingUser.save();

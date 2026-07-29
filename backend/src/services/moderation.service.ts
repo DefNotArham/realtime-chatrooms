@@ -47,3 +47,42 @@ export const moderateMessageAsync = async (
     getIO().to(roomId).emit("message-approved", { messageId, roomId });
   }
 };
+
+/**
+ * Synchronously checks if user-provided text (username, room name, description) is toxic.
+ * Returns true if flagged, false if clean.
+ */
+export const checkInappropriateText = async (
+  text: string,
+  type: "username" | "room name" | "room description",
+): Promise<boolean> => {
+  // Don't waste API calls on empty optional fields
+  if (!text || !text.trim()) return false;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-flash-latest",
+      contents: `Analyze if this ${type} contains offensive language, slurs, explicit content, hate speech, or extreme profanity: "${text}"`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            isFlagged: {
+              type: Type.BOOLEAN,
+              description: "Set to true if content is toxic or inappropriate.",
+            },
+          },
+          required: ["isFlagged"],
+        },
+      },
+    });
+
+    const result = JSON.parse(response.text || "{}");
+    return Boolean(result.isFlagged);
+  } catch (error) {
+    console.error(`Gemini moderation failed for ${type}:`, error);
+    // Fallback: allow creation if API fails so creation isn't blocked
+    return false;
+  }
+};
