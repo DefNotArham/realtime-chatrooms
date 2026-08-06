@@ -2,6 +2,7 @@ import { FaCrown } from "react-icons/fa";
 import useChatroomStore from "../../stores/chatroom.store";
 import {
   useEffect,
+  useRef,
   type Dispatch,
   type RefObject,
   type SetStateAction,
@@ -34,6 +35,8 @@ const MessagesList = ({ mainRef, setShowScrollBottom }: MessagesListProps) => {
   const { roomId } = useParams();
 
   const clientId = localStorage.getItem("clientId");
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+  const isInitialLoad = useRef(true);
 
   const handleScroll = () => {
     if (!mainRef.current) return;
@@ -80,6 +83,22 @@ const MessagesList = ({ mainRef, setShowScrollBottom }: MessagesListProps) => {
       socket.off("message-approved", handleMessageApproved);
     };
   }, [roomId, handleMessageFlagged, handleMessageApproved]);
+
+  useEffect(() => {
+    if (!mainRef.current || messages.length === 0) return;
+
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      bottomRef.current?.scrollIntoView({ behavior: "auto" });
+      return;
+    }
+
+    const { scrollTop, scrollHeight, clientHeight } = mainRef.current;
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+    if (isNearBottom) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, mainRef]);
 
   return (
     <main
@@ -143,6 +162,8 @@ const MessagesList = ({ mainRef, setShowScrollBottom }: MessagesListProps) => {
           </div>
         );
       })}
+
+      <div ref={bottomRef} />
     </main>
   );
 };
