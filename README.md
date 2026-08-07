@@ -113,6 +113,10 @@ Start frontend:
 npm run dev
 ```
 
+## Acknowledgments
+
+I used AI tools like ChatGPT and Claude to help with the frontend development, including UI design ideas, component structure, and styling. The backend, real-time functionality, database setup, and overall project integration were built by me.
+
 ---
 
 ## 🧪 Future Improvements
