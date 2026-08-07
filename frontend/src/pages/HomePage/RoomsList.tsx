@@ -1,4 +1,4 @@
-import { BiCheck, BiCopy } from "react-icons/bi";
+import { BiCheck, BiCopy, BiPin } from "react-icons/bi";
 import useChatroomStore from "../../stores/chatroom.store";
 import { useState, type Dispatch, type SetStateAction } from "react";
 import { useNavigate } from "react-router";
@@ -10,7 +10,7 @@ type RoomsListProps = {
 
 const RoomsList = ({ setSelectedRoomId, setShowUsername }: RoomsListProps) => {
   const [copiedCode, setCopiedCode] = useState<string | null>();
-  const { rooms, enterRoom } = useChatroomStore();
+  const { rooms, pinnedRoomIds, pinRoom, enterRoom } = useChatroomStore();
   const navigate = useNavigate();
 
   const clientId = localStorage.getItem("clientId");
@@ -26,9 +26,17 @@ const RoomsList = ({ setSelectedRoomId, setShowUsername }: RoomsListProps) => {
     }, 2000);
   };
 
+  const handlePinToggle = (roomId: string, currentlyPinned: boolean) => {
+    if (!clientId) return;
+    pinRoom(clientId, roomId, !currentlyPinned);
+  };
+
+  // pinned rooms have their own section above, so exclude them here
+  const unpinnedRooms = rooms.filter((r) => !pinnedRoomIds.includes(r._id));
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-      {rooms.map((r) => {
+      {unpinnedRooms.map((r) => {
         const isCopied = copiedCode === r?.joinCode;
         return (
           <div
@@ -37,6 +45,14 @@ const RoomsList = ({ setSelectedRoomId, setShowUsername }: RoomsListProps) => {
           >
             <div className="flex justify-between items-start gap-3">
               <h2 className="text-lg font-bold ">{r?.name}</h2>
+
+              <button
+                onClick={() => handlePinToggle(r._id, false)}
+                title="Pin room"
+                className="shrink-0 p-1.5 rounded-md transition cursor-pointer text-neutral-500 hover:text-amber-400"
+              >
+                <BiPin size={18} />
+              </button>
             </div>
 
             <p
