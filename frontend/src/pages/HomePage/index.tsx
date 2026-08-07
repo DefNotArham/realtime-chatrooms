@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Header from "./Header";
 import RoomsList from "./RoomsList";
+import PinnedRoomsList from "./PinnedRoomsList";
 import PublicRoomsList from "./PublicRoomsList";
 import CreateRoomModal from "./modals/CreateRoomModal";
 import JoinRoomModal from "./modals/JoinRoomModal";
@@ -39,6 +40,11 @@ const HomePage = () => {
           setShowCreate={setShowCreate}
           setShowEditUsername={setShowEditUsername}
           setShowJoin={setShowJoin}
+        />
+
+        <PinnedRoomsList
+          setSelectedRoomId={setSelectedRoomId}
+          setShowUsername={setShowUsername}
         />
 
         <RoomsList

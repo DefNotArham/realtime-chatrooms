@@ -25,6 +25,7 @@ type RoomStoreType = {
   currentRoom: Chatroom | null;
   rooms: Chatroom[];
   publicRooms: Chatroom[];
+  pinnedRoomIds: string[];
   messages: Message[];
   createChatroomLoading: boolean;
   createChatroomError: string | null;
@@ -43,6 +44,11 @@ type RoomStoreType = {
   ) => Promise<Chatroom | null>;
   loadRooms: (clientId: string) => Promise<Chatroom[] | null>;
   loadPublicRooms: (clientId: string) => Promise<Chatroom[] | null>;
+  pinRoom: (
+    clientId: string,
+    roomId: string,
+    isPinned: boolean,
+  ) => Promise<boolean>;
   joinRoom: (joinCode: string, clientId: string) => Promise<Chatroom | null>;
   enterRoom: (
     clientId: string,
@@ -76,6 +82,7 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
   currentRoom: null,
   rooms: [],
   publicRooms: [],
+  pinnedRoomIds: [],
   messages: [],
   createChatroomLoading: false,
   createChatroomError: null,
@@ -133,8 +140,12 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
       });
 
       const rooms = response.data.rooms as Chatroom[];
+      const pinnedRooms = (response.data.pinnedRooms as Chatroom[]) ?? [];
+      const pinnedRoomIds = pinnedRooms.map((r) =>
+        typeof r === "string" ? r : r._id,
+      );
 
-      set({ rooms, loadingLoadRooms: false });
+      set({ rooms, pinnedRoomIds, loadingLoadRooms: false });
 
       return rooms;
     } catch (error) {
@@ -161,6 +172,36 @@ const useChatroomStore = create<RoomStoreType>((set) => ({
       console.log("Error loading public rooms:", error);
       set({ loadingPublicRooms: false });
       return null;
+    }
+  },
+
+  pinRoom: async (clientId: string, roomId: string, isPinned: boolean) => {
+    // optimistic update so the UI feels instant
+    set((state) => ({
+      pinnedRoomIds: isPinned
+        ? [...state.pinnedRoomIds, roomId]
+        : state.pinnedRoomIds.filter((id) => id !== roomId),
+    }));
+
+    try {
+      await api.post("/chatroom/pin-room", {
+        clientId,
+        roomId,
+        isPinned,
+      });
+
+      return true;
+    } catch (error) {
+      console.log(error);
+
+      // revert on failure
+      set((state) => ({
+        pinnedRoomIds: isPinned
+          ? state.pinnedRoomIds.filter((id) => id !== roomId)
+          : [...state.pinnedRoomIds, roomId],
+      }));
+
+      return false;
     }
   },
 

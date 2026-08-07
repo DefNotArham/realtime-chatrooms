@@ -10,6 +10,7 @@ import loadMessagesController from "../controllers/loadMessages.controller.js";
 import editVisibilityController from "../controllers/editVisibility.controller.js";
 import loadPublicRoomsController from "../controllers/loadPublicRooms.controller.js";
 import { messageLimiter } from "../middlewares/rateLimiter.middleware.js";
+import pinRoomController from "../controllers/pinRoom.controller.js";
 
 const router = express.Router();
 
@@ -22,5 +23,6 @@ router.post("/send-message", messageLimiter, sendMessageController);
 router.post("/load-messages", loadMessagesController);
 router.post("/edit-visibility", editVisibilityController);
 router.get("/load-public-room", loadPublicRoomsController);
+router.post("/pin-room", pinRoomController);
 
 export default router;

@@ -10,6 +10,12 @@ const userSchema = new mongoose.Schema(
         ref: "Chatroom",
       },
     ],
+    pinnedRooms: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Chatroom",
+      },
+    ],
   },
   { timestamps: true },
 );

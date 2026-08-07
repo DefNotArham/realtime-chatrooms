@@ -28,7 +28,7 @@ const loadRoomsController = async (
         .json({ success: false, message: "User not found" });
     }
 
-    return res.status(200).json({ success: true, rooms: user.rooms });
+   return res.status(200).json({ success: true, rooms: user.rooms, pinnedRooms: user.pinnedRooms });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ success: false, message: "Server error" });
